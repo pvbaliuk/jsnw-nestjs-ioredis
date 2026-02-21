@@ -7,6 +7,6 @@ export type RedisForRootParams = {
     keyPrefix?: string;
     db?: number;
     connectionTimeout?: number;
-    lazy?: boolean;s
+    lazy?: boolean;
     isDefault?: boolean;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@jsnw/nestjs-ioredis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NestJS module for integrating Redis using ioredis with support for multiple connections and dependency injection",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
