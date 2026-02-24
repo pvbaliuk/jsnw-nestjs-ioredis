@@ -9,4 +9,5 @@ export type RedisForRootParams = {
     connectionTimeout?: number;
     lazy?: boolean;
     isDefault?: boolean;
+    locksHashKey?: string;
 }
