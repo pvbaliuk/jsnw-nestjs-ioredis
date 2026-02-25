@@ -1,5 +1,6 @@
-import {RedisForRootParams} from './redis.types';
-import {REDIS_INSTANCE_TOKEN_PREFIX} from './redis.consts';
+import type {RedisForRootParams} from './redis.types';
+import {REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS, REDIS_INSTANCE_TOKEN_PREFIX} from './redis.consts';
+import {type RedisLockWaitAcquireParams} from './redis-lock';
 
 export function resolveConnectionName(instanceName: string): string;
 export function resolveConnectionName(params: RedisForRootParams): string;
@@ -47,4 +48,34 @@ export const resolveKeyPrefix = (prefix?: string): string => {
     }
 
     return prefix + ':';
+}
+
+/**
+ * @param {number} iteration
+ * @param {RedisLockWaitAcquireParams["retryInterval"]} [retryInterval]
+ * @return {number}
+ */
+export const getRetryInterval = (iteration: number, retryInterval?: RedisLockWaitAcquireParams['retryInterval']): number => {
+    if(retryInterval === undefined)
+        return REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS;
+
+    if(typeof retryInterval === 'number')
+        return Math.max(1, retryInterval);
+
+    if(Array.isArray(retryInterval)){
+        if(retryInterval.length === 0)
+            return REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS;
+
+        if(retryInterval.length === 1)
+            return retryInterval[0];
+
+        return iteration < retryInterval.length
+            ? retryInterval[iteration]
+            : retryInterval[retryInterval.length - 1];
+    }
+
+    if(typeof retryInterval === 'function')
+        return Math.max(1, retryInterval(iteration) ?? REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS);
+
+    return REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS;
 }

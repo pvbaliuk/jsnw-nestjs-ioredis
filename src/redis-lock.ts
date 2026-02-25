@@ -7,9 +7,11 @@ import {
     REDIS_DEFAULT_LOCKS_HASH_KEY,
     REDIS_LOCKS_HASH_KEY_PROP_NAME
 } from './redis.consts';
+import {getRetryInterval} from './redis.helpers';
 
 export type RedisLockWaitAcquireParams = {
     lockTTL: number;
+    retryInterval?: number|number[]|((iteration: number) => number);
 } & ({
     signal: AbortSignal;
     waitTimeout?: number;
@@ -44,16 +46,19 @@ export class RedisLock{
      */
     public async waitAcquire(params: RedisLockWaitAcquireParams): Promise<boolean>{
         const startedAt: number = Date.now();
+
+        let iteration: number = 0;
         while(true){
-            const acquired = await this.acquire(params.lockTTL);
+            const acquired = await this.acquire(params.lockTTL),
+                RETRY_DELAY_MS = getRetryInterval(iteration, params.retryInterval);
+
             if(acquired)
                 return true;
 
             if(params.signal?.aborted)
                 return false;
 
-            let delayMs = REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS;
-
+            let delayMs = RETRY_DELAY_MS;
             if(params.waitTimeout !== undefined){
                 const elapsed = Date.now() - startedAt,
                     timeLeft = params.waitTimeout - elapsed;
@@ -61,7 +66,7 @@ export class RedisLock{
                 if(timeLeft <= 0)
                     return false;
 
-                delayMs = Math.max(1, Math.min(REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS, timeLeft));
+                delayMs = Math.max(1, Math.min(RETRY_DELAY_MS, timeLeft));
             }
 
             try{
