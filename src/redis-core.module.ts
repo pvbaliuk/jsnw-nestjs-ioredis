@@ -63,6 +63,7 @@ export class RedisCoreModule{
                     keyPrefix: keyPrefix
                 });
 
+                instance['__$__locksHashKey__'] = params.locksHashKey;
                 im.addInstance(redisToken, instance, params.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY);
                 return instance;
             },

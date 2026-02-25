@@ -1,13 +1,12 @@
 import {randomUUID, type UUID} from 'node:crypto';
 import {setTimeout} from 'node:timers/promises';
 import {type Redis} from 'ioredis';
-import {REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS, REDIS_DEFAULT_LOCKS_HASH_KEY} from './redis.consts';
 import dedent from 'dedent';
+import {REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS, REDIS_DEFAULT_LOCKS_HASH_KEY} from './redis.consts';
 
 export type RedisLockConstructorParams = {
     redis: Redis;
     name: string;
-    locksHashKey?: string;
 }
 
 export type RedisLockWaitAcquireParams = {
@@ -36,7 +35,7 @@ export class RedisLock{
     protected constructor(params: RedisLockConstructorParams) {
         this.redis = params.redis;
         this.name = params.name;
-        this.locksHashKey = params.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY;
+        this.locksHashKey = this.redis?.['__$__locksHashKey__'] ?? REDIS_DEFAULT_LOCKS_HASH_KEY;
         this.value = randomUUID();
     }
 
