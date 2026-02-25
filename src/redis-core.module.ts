@@ -1,10 +1,9 @@
-import {type DynamicModule, type FactoryProvider, type Provider, Global, Module, ValueProvider} from '@nestjs/common';
+import {type DynamicModule, type FactoryProvider, type Provider, Global, Module} from '@nestjs/common';
 import {Redis} from 'ioredis';
 import type {RedisForRootParams} from './redis.types';
 import {RedisInstancesManager} from './redis-instances-manager';
-import {REDIS_DEFAULT_CONNECTION_NAME, REDIS_DEFAULT_LOCKS_HASH_KEY} from './redis.consts';
+import {REDIS_DEFAULT_CONNECTION_NAME, REDIS_LOCKS_HASH_KEY_PROP_NAME} from './redis.consts';
 import {getRedisToken, resolveKeyPrefix} from './redis.helpers';
-import dedent from 'dedent';
 
 @Global()
 @Module({
@@ -63,8 +62,8 @@ export class RedisCoreModule{
                     keyPrefix: keyPrefix
                 });
 
-                instance['__$__locksHashKey__'] = params.locksHashKey;
-                im.addInstance(redisToken, instance, params.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY);
+                instance[REDIS_LOCKS_HASH_KEY_PROP_NAME] = params.locksHashKey;
+                im.addInstance(redisToken, instance);
                 return instance;
             },
             inject: [
