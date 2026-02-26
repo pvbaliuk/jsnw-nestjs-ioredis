@@ -1,19 +1,19 @@
 import {type DynamicModule, Module} from '@nestjs/common';
-import type {RedisForRootParams} from './redis.types';
+import type {RedisRegisterOptions} from './redis.types';
 import {RedisCoreModule} from './redis-core.module';
 
 @Module({})
 export class RedisModule{
 
     /**
-     * @param {RedisForRootParams} params
+     * @param {RedisRegisterOptions} options
      * @return {DynamicModule}
      */
-    public static forRoot(params: RedisForRootParams): DynamicModule{
+    public static register(options: RedisRegisterOptions): DynamicModule{
         return {
             module: RedisModule,
             imports: [
-                RedisCoreModule.forRoot(params)
+                RedisCoreModule.register(options)
             ]
         };
     }

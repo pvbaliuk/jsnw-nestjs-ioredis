@@ -1,74 +1,61 @@
-import {type DynamicModule, type FactoryProvider, type Provider, Global, Module} from '@nestjs/common';
-import {Redis} from 'ioredis';
-import type {RedisForRootParams} from './redis.types';
-import {RedisInstancesManager} from './redis-instances-manager';
-import {REDIS_DEFAULT_CONNECTION_NAME, REDIS_LOCKS_HASH_KEY_PROP_NAME} from './redis.consts';
-import {getRedisToken, resolveKeyPrefix} from './redis.helpers';
+import {Global, Module, type DynamicModule, type FactoryProvider, type ValueProvider} from '@nestjs/common';
+import Redis from 'ioredis';
+import type {RedisRegisterOptions} from './redis.types';
+import {REDIS_DEFAULT_LOCKS_HASH_KEY, REDIS_OPTIONS_TOKEN} from './redis.consts';
+import {resolveKeyPrefix} from './redis.helpers';
+import {RedisLockFactory} from './redis-lock.factory';
 
 @Global()
-@Module({
-    providers: [
-        RedisInstancesManager
-    ]
-})
+@Module({})
 export class RedisCoreModule{
 
     /**
-     * @param {RedisForRootParams} params
+     * @param {RedisRegisterOptions} options
      * @return {DynamicModule}
      */
-    public static forRoot(params: RedisForRootParams): DynamicModule{
-        const providers: Provider[] = [];
-        const redisProvider = this.createRedisProvider(params);
-
-        providers.push(redisProvider);
-        if(!!params.isDefault)
-            providers.push({
-                provide: getRedisToken(REDIS_DEFAULT_CONNECTION_NAME),
-                useExisting: getRedisToken(params)
-            });
+    public static register(options: RedisRegisterOptions): DynamicModule{
+        const optionsProvider = this.createOptionsProvider(options),
+            redisProvider = this.createRedisProvider();
 
         return {
             module: RedisCoreModule,
-            providers: providers,
-            exports: providers
+            providers: [
+                optionsProvider,
+                redisProvider,
+                RedisLockFactory
+            ],
+            exports: [
+                redisProvider,
+                RedisLockFactory
+            ]
         };
     }
 
     /**
-     * @param {RedisForRootParams} params
+     * @param {RedisRegisterOptions} options
+     * @return {ValueProvider}
+     * @private
+     */
+    private static createOptionsProvider(options: RedisRegisterOptions): ValueProvider{
+        return {
+            provide: REDIS_OPTIONS_TOKEN,
+            useValue: <RedisRegisterOptions>{
+                ...options,
+                keyPrefix: resolveKeyPrefix(options.keyPrefix),
+                locksHashKey: options.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY
+            }
+        };
+    }
+
+    /**
      * @return {FactoryProvider}
      * @private
      */
-    private static createRedisProvider(params: RedisForRootParams): FactoryProvider{
-        const redisToken = getRedisToken(params),
-            keyPrefix = resolveKeyPrefix(params.keyPrefix);
-
+    private static createRedisProvider(): FactoryProvider{
         return {
-            provide: redisToken,
-            useFactory: (im: RedisInstancesManager) => {
-                const existingInstance = im.getInstance(redisToken);
-                if(existingInstance)
-                    return existingInstance;
-
-                const instance = new Redis({
-                    host: params.hostname,
-                    port: params.port,
-                    username: params.username,
-                    password: params.password,
-                    db: params.db ?? 0,
-                    connectTimeout: params.connectionTimeout ?? 10_000,
-                    lazyConnect: !!params.lazy,
-                    keyPrefix: keyPrefix
-                });
-
-                instance[REDIS_LOCKS_HASH_KEY_PROP_NAME] = params.locksHashKey;
-                im.addInstance(redisToken, instance);
-                return instance;
-            },
-            inject: [
-                RedisInstancesManager
-            ]
+            provide: Redis,
+            useFactory: (options: RedisRegisterOptions) => new Redis(options),
+            inject: [REDIS_OPTIONS_TOKEN]
         };
     }
 

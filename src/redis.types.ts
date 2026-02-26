@@ -1,13 +1,6 @@
-export type RedisForRootParams = {
-    connectionName?: string;
-    hostname: string;
-    port: number;
-    username: string;
-    password: string;
+import {type RedisOptions} from 'ioredis';
+
+export type RedisRegisterOptions = RedisOptions & {
     keyPrefix?: string;
-    db?: number;
-    connectionTimeout?: number;
-    lazy?: boolean;
-    isDefault?: boolean;
     locksHashKey?: string;
 }
