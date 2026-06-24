@@ -1,0 +1,15 @@
+blockExoticSubdeps: true
+catalog:
+  '@nestjs/common': ^11.1.27
+  dedent: ^1.7.2
+  ioredis: ^5.11.1
+  tsdown: ^0.22.3
+  typescript: ^5.9.3
+catalogMode: strict
+ignoreDepScripts: true
+minimumReleaseAge: 1080 # 15 days
+minimumReleaseAgeExclude:
+  - '@jsnw/*'
+minimumReleaseAgeIgnoreMissingTime: false
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 20160 # 30 days
