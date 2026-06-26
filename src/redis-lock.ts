@@ -106,15 +106,8 @@ export class RedisLock{
     /**
      * @return {Promise<void>}
      */
-    public async release(): Promise<void>{
-        await this.redis.eval(dedent`
-        if redis.call("hget", KEYS[1], ARGV[1]) == ARGV[2]
-        then
-            return redis.call("hdel", KEYS[1], ARGV[1])
-        else
-            return 0
-        end
-        `, 1, this.locksHashKey, this.name, this.value);
+    public async release(): Promise<number>{
+        return this.redis.releaseLockAtomic(this.locksHashKey, this.name, this.value);
     }
 
 }

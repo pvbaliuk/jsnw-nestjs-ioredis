@@ -4,6 +4,7 @@ import type {RedisRegisterOptions} from './redis.types';
 import {REDIS_DEFAULT_LOCKS_HASH_KEY, REDIS_OPTIONS_TOKEN} from './redis.consts';
 import {resolveKeyPrefix} from './redis.helpers';
 import {RedisLockFactory} from './redis-lock.factory';
+import dedent from 'dedent';
 
 @Global()
 @Module({})
@@ -54,9 +55,27 @@ export class RedisCoreModule{
     private static createRedisProvider(): FactoryProvider{
         return {
             provide: Redis,
-            useFactory: (options: RedisRegisterOptions) => new Redis(options),
+            useFactory: (options: RedisRegisterOptions) => RedisCoreModule.extendRedisWithCommands(new Redis(options)),
             inject: [REDIS_OPTIONS_TOKEN]
         };
+    }
+
+    /**
+     * @param {Redis} redis
+     * @private
+     */
+    private static extendRedisWithCommands(redis: Redis): void{
+        redis.defineCommand('releaseLockAtomic', {
+            numberOfKeys: 1,
+            lua: dedent`
+            if redis.call("hget", KEYS[1], ARGV[1]) == ARGV[2]
+            then
+                return redis.call("hdel", KEYS[1], ARGV[1])
+            else
+                return 0
+            end
+            `
+        });
     }
 
 }

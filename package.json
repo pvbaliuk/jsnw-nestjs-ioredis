@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@nestjs/common": "catalog:",
+    "@types/node": "catalog:",
     "ioredis": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:"
