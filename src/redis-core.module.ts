@@ -76,6 +76,19 @@ export class RedisCoreModule{
             end
             `
         });
+
+        redis.defineCommand('renewLockAtomic', {
+            numberOfKeys: 1,
+            lua: dedent`
+            if redis.call("hget", KEYS[1], ARGV[1]) == ARGV[2]
+            then
+                redis.call("hexpire", KEYS[1], ARGV[3], "XX", "FIELDS", 1, ARGV[1])
+                return 1
+            else
+                return 0
+            end
+            `
+        })
     }
 
 }

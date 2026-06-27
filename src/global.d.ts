@@ -12,5 +12,7 @@ declare module 'ioredis'{
          * @returns {Promise<number>} A promise that resolves when the operation is complete. Returns 0 if no locks were released
          */
         releaseLockAtomic: (locksHashKey: string, lockName: string, value: string, callback?: Callback<number>) => Result<number, Context>;
+
+        renewLockAtomic: (locksHashKey: string, lockName: string, value: string, ttlSec: number, callback?: Callback<0|1>) => Result<0 | 1, Context>;
     }
 }

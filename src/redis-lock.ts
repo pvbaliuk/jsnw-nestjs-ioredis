@@ -104,6 +104,15 @@ export class RedisLock{
     }
 
     /**
+     * @param {number} ttlSec
+     * @return {Promise<boolean>}
+     */
+    public async renew(ttlSec: number): Promise<boolean>{
+        const r = await this.redis.renewLockAtomic(this.locksHashKey, this.name, this.value, ttlSec);
+        return r === 1;
+    }
+
+    /**
      * @return {Promise<void>}
      */
     public async release(): Promise<number>{

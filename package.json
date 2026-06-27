@@ -1,6 +1,6 @@
 {
   "name": "@jsnw/nestjs-ioredis",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "NestJS module for integrating Redis",
   "scripts": {
     "build": "tsdown",
