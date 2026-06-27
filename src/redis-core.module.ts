@@ -62,9 +62,10 @@ export class RedisCoreModule{
 
     /**
      * @param {Redis} redis
+     * @return {Redis}
      * @private
      */
-    private static extendRedisWithCommands(redis: Redis): void{
+    private static extendRedisWithCommands(redis: Redis): Redis{
         redis.defineCommand('releaseLockAtomic', {
             numberOfKeys: 1,
             lua: dedent`
@@ -88,7 +89,9 @@ export class RedisCoreModule{
                 return 0
             end
             `
-        })
+        });
+
+        return redis;
     }
 
 }

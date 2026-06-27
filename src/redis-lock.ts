@@ -1,7 +1,6 @@
 import {randomUUID, type UUID} from 'node:crypto';
 import {setTimeout} from 'node:timers/promises';
 import Redis from 'ioredis';
-import dedent from 'dedent';
 import {getRetryInterval} from './redis.helpers';
 
 export type RedisLockWaitAcquireParams = {
