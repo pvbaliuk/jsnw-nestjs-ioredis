@@ -15,12 +15,12 @@ export type RedisKeyConfigMap = Record<string, RedisKeyConfig>;
 
 export type RedisKeyResolved<T extends RedisKeyConfig> = {
     key: string;
-    ttl: 'ttl' extends keyof T
-        ? T['ttl'] extends RedisTTLString
-            ? RedisTTLResolved
-            : undefined
+    ttl: T['ttl'] extends RedisTTLString
+        ? RedisTTLResolved
         : undefined;
-    schema?: T['schema'];
+    schema: T['schema'] extends z.ZodSchema
+        ? T['schema']
+        : undefined;
 };
 
 export type RedisKeyFactoryMap<T extends RedisKeyConfigMap> = {
