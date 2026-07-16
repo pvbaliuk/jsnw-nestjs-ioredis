@@ -58,7 +58,9 @@ export class RedisCacheService{
             }
 
             return true;
-        }catch(e){}
+        }catch(e){
+            void this.del(key);
+        }
 
         return false;
     }
@@ -183,6 +185,7 @@ export class RedisCacheService{
             fields.push(REDIS_CACHE_EMPTY_HOLDER_KEY, Date.now().toString());
             numfields++;
         }catch(e){
+            void this.del(key);
             return false;
         }
 
@@ -194,7 +197,9 @@ export class RedisCacheService{
             }
 
             return true;
-        }catch(e){}
+        }catch(e){
+            void this.del(key);
+        }
 
         return false;
     }
