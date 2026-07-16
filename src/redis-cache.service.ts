@@ -22,9 +22,9 @@ export class RedisCacheService{
     /**
      * @template {RedisKeyResolved} T
      * @param {T} key
-     * @return {Promise<RedisCacheOutput<T["schema"]> | null>}
+     * @return {Promise<RedisCacheOutput<T> | null>}
      */
-    public async get<T extends RedisKeyResolved<any>>(key: T): Promise<RedisCacheOutput<T['schema']>|null>{
+    public async get<T extends RedisKeyResolved<any>>(key: T): Promise<RedisCacheOutput<T>|null>{
         const json = await this.redis.get(this.key(key));
         if(!json)
             return null;
@@ -44,10 +44,10 @@ export class RedisCacheService{
     /**
      * @template {RedisKeyResolved} T
      * @param {T} key
-     * @param {RedisCacheInput<T["schema"]>} data
+     * @param {RedisCacheInput<T>} data
      * @return {Promise<boolean>}
      */
-    public async set<T extends RedisKeyResolved<any>>(key: T, data: RedisCacheInput<T['schema']>): Promise<boolean>{
+    public async set<T extends RedisKeyResolved<any>>(key: T, data: RedisCacheInput<T>): Promise<boolean>{
        const ttlMs = key.ttl ? key.ttl.asMillis : -1;
         try{
             const json = JSON.stringify(data);
@@ -83,9 +83,9 @@ export class RedisCacheService{
      * @template {RedisKeyResolved} T
      * @param {T} key
      * @param {string} field
-     * @return {Promise<RedisCacheOutput<T["schema"]> | null>}
+     * @return {Promise<RedisCacheOutput<T> | null>}
      */
-    public async hget<T extends RedisKeyResolved<any>>(key: T, field: string): Promise<RedisCacheOutput<T['schema']>|null>{
+    public async hget<T extends RedisKeyResolved<any>>(key: T, field: string): Promise<RedisCacheOutput<T>|null>{
         const json = await this.redis.hget(this.key(key), field);
         if(!json)
             return null;
@@ -106,9 +106,9 @@ export class RedisCacheService{
      * @template {RedisKeyResolved} T
      * @param {T} key
      * @param {string[]} fields
-     * @return {Promise<Record<string, RedisCacheOutput<T["schema"]>> | null>}
+     * @return {Promise<Record<string, RedisCacheOutput<T>> | null>}
      */
-    public async hmget<T extends RedisKeyResolved<any>>(key: T, fields: string[]): Promise<Record<string, RedisCacheOutput<T['schema']>>|null>{
+    public async hmget<T extends RedisKeyResolved<any>>(key: T, fields: string[]): Promise<Record<string, RedisCacheOutput<T>>|null>{
         if(fields.length === 0)
             return {};
 
@@ -116,7 +116,7 @@ export class RedisCacheService{
         if(jsonItems.length === 0)
             return null;
 
-        const out: Record<string, RedisCacheOutput<T['schema']>> = {};
+        const out: Record<string, RedisCacheOutput<T>> = {};
         try{
             for(let i = 0; i < fields.length; i++){
                 const jsonStr = jsonItems[i];
@@ -140,11 +140,11 @@ export class RedisCacheService{
     /**
      * @template {RedisKeyResolved} T
      * @param {T} key
-     * @return {Promise<Record<string, RedisCacheOutput<T["schema"]>> | null>}
+     * @return {Promise<Record<string, RedisCacheOutput<T>> | null>}
      */
-    public async hgetall<T extends RedisKeyResolved<any>>(key: T): Promise<Record<string, RedisCacheOutput<T['schema']>>|null>{
+    public async hgetall<T extends RedisKeyResolved<any>>(key: T): Promise<Record<string, RedisCacheOutput<T>>|null>{
         const jsonItems = await this.redis.hgetall(this.key(key));
-        const out: Record<string, RedisCacheOutput<T['schema']>> = {};
+        const out: Record<string, RedisCacheOutput<T>> = {};
 
         try{
             for(const [k, v] of Object.entries(jsonItems)){
@@ -168,10 +168,10 @@ export class RedisCacheService{
     /**
      * @template {RedisKeyResolved} T
      * @param {T} key
-     * @param {Record<string, RedisCacheInput<T["schema"]>>} items
+     * @param {Record<string, RedisCacheInput<T>>} items
      * @return {Promise<boolean>}
      */
-    public async hset<T extends RedisKeyResolved<any>>(key: T, items: Record<string, RedisCacheInput<T['schema']>>): Promise<boolean>{
+    public async hset<T extends RedisKeyResolved<any>>(key: T, items: Record<string, RedisCacheInput<T>>): Promise<boolean>{
         const ttlMs = key.ttl ? key.ttl.asMillis : -1;
         const fields: string[] = [];
         let numfields: number = 0;
@@ -221,6 +221,42 @@ export class RedisCacheService{
         }catch(e){}
 
         return false;
+    }
+
+    /**
+     * @template {RedisKeyResolved} T
+     * @param {T} key
+     * @param {RedisCacheInput<T>} data
+     * @return {Promise<boolean>}
+     */
+    public async hsetAsObj<T extends RedisKeyResolved<any>>(key: T, data: RedisCacheInput<T>): Promise<boolean>{
+        if(!await this.del(key))
+            return false;
+
+        return this.hset(key, data as any);
+    }
+
+    /**
+     * @template {RedisKeyResolved} T
+     * @param {T} key
+     * @return {Promise<RedisCacheOutput<T> | null>}
+     * @private
+     */
+    public async hgetallAsObj<T extends RedisKeyResolved<any>>(key: T): Promise<RedisCacheOutput<T>|null>{
+        const jsonItems = await this.redis.hgetall(this.key(key));
+        try{
+            const out: Record<string, any> = {};
+            for(const [k, v] of Object.entries(jsonItems))
+                out[k] = JSON.parse(v);
+
+            return key.schema
+                ? key.schema.parse(out)
+                : out as RedisCacheOutput<T>;
+        }catch(e){
+            void this.del(key);
+        }
+
+        return null;
     }
 
     /**

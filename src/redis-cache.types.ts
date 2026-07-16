@@ -33,10 +33,14 @@ export type RedisKeyFactoryMap<T extends RedisKeyConfigMap> = {
 
 export type RedisKeyResolvable = string | {key: string};
 
-export type RedisCacheInput<TSchema extends z.ZodSchema> = TSchema extends z.ZodSchema
-    ? z.input<TSchema>
+export type RedisCacheInput<T extends RedisKeyResolved<any>> = 'schema' extends keyof T
+    ? T['schema'] extends z.ZodSchema
+        ? z.input<T['schema']>
+        : unknown
     : unknown;
 
-export type RedisCacheOutput<TSchema extends z.ZodSchema> = TSchema extends z.ZodSchema
-    ? z.output<TSchema>
+export type RedisCacheOutput<T extends RedisKeyResolved<any>> = 'schema' extends keyof T
+    ? T['schema'] extends z.ZodSchema
+        ? z.output<T['schema']>
+        : unknown
     : unknown;
