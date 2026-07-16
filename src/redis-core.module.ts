@@ -1,10 +1,11 @@
-import {Global, Module, type DynamicModule, type FactoryProvider, type ValueProvider} from '@nestjs/common';
 import Redis from 'ioredis';
+import dedent from 'dedent';
+import {Global, Module, type DynamicModule, type FactoryProvider, type ValueProvider} from '@nestjs/common';
 import type {RedisRegisterOptions} from './redis.types';
-import {REDIS_DEFAULT_LOCKS_HASH_KEY, REDIS_OPTIONS_TOKEN} from './redis.consts';
+import {REDIS_DEFAULT_CACHE_KEY_PREFIX, REDIS_DEFAULT_LOCKS_HASH_KEY, REDIS_OPTIONS_TOKEN} from './redis.consts';
 import {resolveKeyPrefix} from './redis.helpers';
 import {RedisLockFactory} from './redis-lock.factory';
-import dedent from 'dedent';
+import {RedisCacheService} from './redis-cache.service';
 
 @Global()
 @Module({})
@@ -23,11 +24,13 @@ export class RedisCoreModule{
             providers: [
                 optionsProvider,
                 redisProvider,
-                RedisLockFactory
+                RedisLockFactory,
+                RedisCacheService
             ],
             exports: [
                 redisProvider,
-                RedisLockFactory
+                RedisLockFactory,
+                RedisCacheService
             ]
         };
     }
@@ -43,7 +46,8 @@ export class RedisCoreModule{
             useValue: <RedisRegisterOptions>{
                 ...options,
                 keyPrefix: resolveKeyPrefix(options.keyPrefix),
-                locksHashKey: options.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY
+                locksHashKey: options.locksHashKey ?? REDIS_DEFAULT_LOCKS_HASH_KEY,
+                cacheKeyPrefix: options.cacheKeyPrefix ?? REDIS_DEFAULT_CACHE_KEY_PREFIX
             }
         };
     }
