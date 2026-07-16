@@ -12,12 +12,18 @@ catalogs:
     '@types/node':
       specifier: ^24.13.3
       version: 24.13.3
+    '@types/timestring':
+      specifier: ^7.0.0
+      version: 7.0.0
     dedent:
       specifier: ^1.7.2
       version: 1.7.2
     ioredis:
       specifier: ^5.11.1
       version: 5.11.1
+    timestring:
+      specifier: ^7.0.0
+      version: 7.0.0
     tsdown:
       specifier: ^0.22.8
       version: 0.22.8
@@ -32,6 +38,9 @@ importers:
       dedent:
         specifier: 'catalog:'
         version: 1.7.2
+      timestring:
+        specifier: 'catalog:'
+        version: 7.0.0
     devDependencies:
       '@nestjs/common':
         specifier: 'catalog:'
@@ -39,6 +48,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
+      '@types/timestring':
+        specifier: 'catalog:'
+        version: 7.0.0
       ioredis:
         specifier: 'catalog:'
         version: 5.11.1
@@ -205,6 +217,9 @@ packages:
 
   '@types/node@24.13.3':
     resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
+
+  '@types/timestring@7.0.0':
+    resolution: {integrity: sha512-ZFdmx8cDafCuTsVdP0xEOj8MEHKFo0P7x4lJPMZRKryoURfaO3MtJp4Ih0l35r8tM/+hnTGSAEL9PYf1N/3tbg==}
 
   '@yuku-codegen/binding-darwin-arm64@0.6.3':
     resolution: {integrity: sha512-pbDcFygFmbvo0jGFq5U0m5Sa9U8aVttVJWbBHZDZ68w/X48HdDWS1V4XvBacs8XkmWbTr/ef5fMGG7HsngqTmg==}
@@ -486,6 +501,10 @@ packages:
     resolution: {integrity: sha512-ki4hZQfh5rX0QDLLkOCj+h+CVNkqmp/CMf8v8kZpkNVK6jGQooMytqzLZYUVYIZcFZ6yDB70EfD8POcFXiF5oA==}
     engines: {node: '>=18'}
 
+  timestring@7.0.0:
+    resolution: {integrity: sha512-U7ttxEdKWqHYJ96OGoJJR5gU8Nwkl3tlY0n7Jr4vcpLD2RkVZLE1Ph9k8ZRrZ7LYX9QCtd3M9OUaR9P8Z37QNg==}
+    engines: {node: '>=12'}
+
   tinyexec@1.2.4:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
     engines: {node: '>=18'}
@@ -685,6 +704,8 @@ snapshots:
     dependencies:
       undici-types: 7.18.2
 
+  '@types/timestring@7.0.0': {}
+
   '@yuku-codegen/binding-darwin-arm64@0.6.3':
     optional: true
 
@@ -876,6 +897,8 @@ snapshots:
   strtok3@10.3.5:
     dependencies:
       '@tokenizer/token': 0.3.0
+
+  timestring@7.0.0: {}
 
   tinyexec@1.2.4: {}
 
