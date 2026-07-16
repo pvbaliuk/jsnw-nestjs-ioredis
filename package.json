@@ -36,7 +36,8 @@
   "license": "MIT",
   "dependencies": {
     "dedent": "catalog:",
-    "timestring": "catalog:"
+    "timestring": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "@nestjs/common": "catalog:",
