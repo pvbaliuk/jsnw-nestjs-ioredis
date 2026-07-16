@@ -5,3 +5,4 @@ export {RedisLockFactory} from './redis-lock.factory';
 export {RedisLock, type RedisLockWaitAcquireParams} from './redis-lock';
 
 export {RedisCacheService} from './redis-cache.service';
+export {createRedisKeyFactory} from './redis-cache.utils';
