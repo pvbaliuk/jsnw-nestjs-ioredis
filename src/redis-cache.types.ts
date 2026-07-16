@@ -13,19 +13,15 @@ export type RedisKeyConfig = {
 
 export type RedisKeyConfigMap = Record<string, RedisKeyConfig>;
 
-export type RedisKeyResolved<T extends RedisKeyConfig> = Prettify<Without<{
+export type RedisKeyResolved<T extends RedisKeyConfig> = {
     key: string;
     ttl: 'ttl' extends keyof T
         ? T['ttl'] extends RedisTTLString
             ? RedisTTLResolved
-            : never
-        : never;
-    schema: 'schema' extends keyof T
-        ? T['schema'] extends z.ZodSchema
-            ? T['schema']
-            : never
-        : never;
-}, never>>;
+            : undefined
+        : undefined;
+    schema?: T['schema'];
+};
 
 export type RedisKeyFactoryMap<T extends RedisKeyConfigMap> = {
     [K in keyof T]: (...args: Parameters<T[K]['key']>) => RedisKeyResolved<T[K]>;
