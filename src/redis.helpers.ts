@@ -49,3 +49,19 @@ export const getRetryInterval = (iteration: number, retryInterval?: RedisLockWai
 
     return REDIS_DEFAULT_LOCK_ACQUIRE_RETRY_DELAY_MS;
 }
+
+/**
+ * @param {object} obj
+ * @return {boolean}
+ */
+export const isObjectEmpty = (obj: object): boolean => {
+    if(Array.isArray(obj))
+        return obj.length === 0;
+
+    for(const key in obj){
+        if(Object.prototype.hasOwnProperty.call(obj, key))
+            return false;
+    }
+
+    return true;
+}

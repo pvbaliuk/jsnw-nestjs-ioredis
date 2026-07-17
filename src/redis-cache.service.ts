@@ -9,6 +9,7 @@ import type {
     RedisKeyResolved
 } from './redis-cache.types';
 import {resolveRedisKey} from './redis-cache.utils';
+import {isObjectEmpty} from './redis.helpers';
 
 @Injectable()
 export class RedisCacheService{
@@ -144,8 +145,10 @@ export class RedisCacheService{
      */
     public async hgetall<T extends RedisKeyResolved<any>>(key: T): Promise<Record<string, RedisCacheOutput<T>>|null>{
         const jsonItems = await this.redis.hgetall(this.key(key));
-        const out: Record<string, RedisCacheOutput<T>> = {};
+        if(isObjectEmpty(jsonItems))
+            return null;
 
+        const out: Record<string, RedisCacheOutput<T>> = {};
         try{
             for(const [k, v] of Object.entries(jsonItems)){
                 if(k === REDIS_CACHE_EMPTY_HOLDER_KEY)
@@ -233,6 +236,9 @@ export class RedisCacheService{
         if(!await this.del(key))
             return false;
 
+        if(typeof data === 'object' && data !== null)
+            data[REDIS_CACHE_EMPTY_HOLDER_KEY] = Date.now().toString();
+
         return this.hset(key, data as any);
     }
 
@@ -244,10 +250,17 @@ export class RedisCacheService{
      */
     public async hgetallAsObj<T extends RedisKeyResolved<any>>(key: T): Promise<RedisCacheOutput<T>|null>{
         const jsonItems = await this.redis.hgetall(this.key(key));
+        if(isObjectEmpty(jsonItems))
+            return null;
+
         try{
             const out: Record<string, any> = {};
-            for(const [k, v] of Object.entries(jsonItems))
+            for(const [k, v] of Object.entries(jsonItems)){
+                if(k === REDIS_CACHE_EMPTY_HOLDER_KEY)
+                    continue;
+
                 out[k] = JSON.parse(v);
+            }
 
             return key.schema
                 ? key.schema.parse(out)
